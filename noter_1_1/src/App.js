@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import NoteList from './components/NoteList';
+import AddNote from './components/AddNote';
+import RegisterStudent from './components/RegisterStudent';
+import RegisterEducator from './components/RegisterEducator';
+import LoginStudent from './components/LoginStudent';
+import LoginEducator from './components/LoginEducator';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+    const [user, setUser] = useState(null);
+
+    const handleLogin = (loggedInUser) => {
+        setUser(loggedInUser);
+    };
+
+    return (
+        <div>
+            <h1>Class Notes</h1>
+            {!user ? (
+                <>
+                    <RegisterStudent />
+                    <RegisterEducator />
+                    <LoginStudent onLogin={handleLogin} />
+                    <LoginEducator onLogin={handleLogin} />
+                </>
+            ) : (
+                <>
+                    {user.role === 'EDUCATOR' && <AddNote role={user.role} />}
+                    <NoteList />
+                </>
+            )}
+        </div>
+    );
+};
 
 export default App;
+
