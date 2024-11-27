@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { registerStudent } from './services/userService';
+import { registerStudent } from '../services/UserService';
 
 const RegisterStudent = () => {
     const [username, setUsername] = useState('');

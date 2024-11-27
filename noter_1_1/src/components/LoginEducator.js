@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loginEducator } from './services/userService';
+import { loginEducator } from '../services/UserService';
 
 const LoginEducator = ({ onLogin }) => {
     const [username, setUsername] = useState('');

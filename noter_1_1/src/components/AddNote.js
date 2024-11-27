@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createNote } from './services/noteService';
+import { createNote } from '../services/noteService';
 
 const AddNote = ({ role }) => {
     const [subject, setSubject] = useState('');
