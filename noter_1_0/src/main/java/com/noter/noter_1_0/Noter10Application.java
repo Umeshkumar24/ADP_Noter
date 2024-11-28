@@ -8,13 +8,13 @@ public class Noter10Application {
 
 	public static void main(String[] args) {
 
-		String url = "jdbc:oracle:thin:@localhost:1521:orcl";
-		String username = "UMESH";
-		String password = "1234";
-		if (DatabaseConnectionChecker.isDatabaseConnected(url, username, password)) {
+		// String url = "jdbc:oracle:thin:@192.168.29.187:1521/XE";
+		// String username = "UMESH";
+		// String password = "1234";
+		// if (DatabaseConnectionChecker.isDatabaseConnected(url, username, password)) {
 			SpringApplication.run(Noter10Application.class, args);
-		} else {
-			System.err.println("Failed to connect to the database. Application will not start.");
-		}
+		// } else {
+		// 	System.err.println("Failed to connect to the database. Application will not start.");
+		// }
 	}
 }
