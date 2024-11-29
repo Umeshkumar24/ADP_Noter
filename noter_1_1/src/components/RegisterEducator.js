@@ -22,7 +22,7 @@ const RegisterEducator = () => {
                 <label>Password:</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
-            <button type="submit">Register as Educator</button>
+            <button type="submit">Educator</button>
         </form>
     );
 };

@@ -1,4 +1,4 @@
-package com.noter.noter_1_0;
+package com.noter.noter_1_0.Entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

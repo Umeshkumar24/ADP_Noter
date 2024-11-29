@@ -1,16 +1,39 @@
 import React, { useState } from 'react';
 import NoteList from './components/NoteList';
 import AddNote from './components/AddNote';
-import RegisterStudent from './components/RegisterStudent';
-import RegisterEducator from './components/RegisterEducator';
-import LoginStudent from './components/LoginStudent';
-import LoginEducator from './components/LoginEducator';
+import AuthForm from './components/AuthForm';
+import { registerStudent, loginStudent } from './services/studentApi';
+import { registerEducator, loginEducator } from './services/educatorApi';
 
 const App = () => {
     const [user, setUser] = useState(null);
+    const [userType, setUserType] = useState('student');
+    const [isLogin, setIsLogin] = useState(true);
 
-    const handleLogin = (loggedInUser) => {
-        setUser(loggedInUser);
+    const handleAuth = async (credentials, userType) => {
+        try {
+            let loggedInUser;
+            if (userType === 'student') {
+                loggedInUser = isLogin
+                    ? await loginStudent(credentials)
+                    : await registerStudent(credentials);
+            } else {
+                loggedInUser = isLogin
+                    ? await loginEducator(credentials)
+                    : await registerEducator(credentials);
+            }
+            setUser(loggedInUser.data);
+        } catch (error) {
+            console.error(`${isLogin ? 'Login' : 'Registration'} failed:`, error);
+        }
+    };
+
+    const toggleAuthMode = () => {
+        setIsLogin(!isLogin);
+    };
+
+    const toggleUserType = () => {
+        setUserType(userType === 'student' ? 'educator' : 'student');
     };
 
     return (
@@ -18,10 +41,15 @@ const App = () => {
             <h1>Class Notes</h1>
             {!user ? (
                 <>
-                    <RegisterStudent />
-                    <RegisterEducator />
-                    <LoginStudent onLogin={handleLogin} />
-                    <LoginEducator onLogin={handleLogin} />
+                    <button onClick={toggleUserType}>
+                        Switch to {userType === 'student' ? 'Educator' : 'Student'}
+                    </button>
+                    <AuthForm 
+                        userType={userType} 
+                        isLogin={isLogin} 
+                        onSubmit={handleAuth} 
+                        onToggle={toggleAuthMode} 
+                    />
                 </>
             ) : (
                 <>
@@ -34,4 +62,3 @@ const App = () => {
 };
 
 export default App;
-
