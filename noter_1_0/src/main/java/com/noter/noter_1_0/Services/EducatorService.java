@@ -3,7 +3,7 @@ package com.noter.noter_1_0.Services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.noter.noter_1_0.Educator;
+import com.noter.noter_1_0.Entity.Educator;
 import com.noter.noter_1_0.Models.EducatorRepository;
 
 @Service

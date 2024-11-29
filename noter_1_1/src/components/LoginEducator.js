@@ -23,7 +23,7 @@ const LoginEducator = ({ onLogin }) => {
                 <label>Password:</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
-            <button type="submit">Login as Educator</button>
+            <button type="submit">Educator</button>
         </form>
     );
 };

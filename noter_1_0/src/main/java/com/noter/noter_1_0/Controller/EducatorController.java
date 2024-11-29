@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.noter.noter_1_0.Educator;
+import com.noter.noter_1_0.Entity.Educator;
 import com.noter.noter_1_0.Services.EducatorService;
 
 @RestController
