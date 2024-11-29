@@ -11,7 +11,9 @@ import com.noter.noter_1_0.Entity.Student;
 import com.noter.noter_1_0.Services.StudentService;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:3000", "http://192.168.29.187:9090"})
 @RequestMapping("/api/students")
+
 public class StudentController {
     @Autowired
     private StudentService studentService;

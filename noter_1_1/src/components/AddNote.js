@@ -1,45 +1,57 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
-import { createNote } from '../services/noteService';
+import { createNote } from '../services/noteApi';
 
-const AddNote = ({ role }) => {
+const AddNote = ({ role, educatorName }) => {
     const [subject, setSubject] = useState('');
     const [file, setFile] = useState(null);
-    const [educatorName, setEducatorName] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const [alertVariant, setAlertVariant] = useState('success');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (role !== 'EDUCATOR') {
+            setAlertVariant('danger');
             setAlertMessage('Only educators can create notes');
             setShowAlert(true);
             return;
         }
 
-        const formData = new FormData();
-        formData.append('subject', subject);
-        formData.append('file', file);
-        formData.append('educatorName', educatorName);
+        try {
+            const formData = new FormData();
+            formData.append('subject', subject);
+            formData.append('file', file);
+            formData.append('educatorName', educatorName);
 
-        createNote(formData).then(response => {
-            console.log('Note created:', response.data);
+            const response = await createNote(formData);
+            setAlertVariant('success');
             setAlertMessage('Note created successfully!');
             setShowAlert(true);
-        }).catch(error => {
-            console.error('Error creating note:', error);
+            
+            // Reset form
+            setSubject('');
+            setFile(null);
+            
+        } catch (error) {
+            setAlertVariant('danger');
             setAlertMessage('Error creating note. Please try again.');
             setShowAlert(true);
-        });
+            console.error('Error creating note:', error);
+        }
     };
 
     return (
         <Container>
             <Row className="justify-content-md-center mt-5">
                 <Col md={6}>
-                    {showAlert && <Alert variant={role !== 'EDUCATOR' ? 'danger' : 'success'}>{alertMessage}</Alert>}
+                    {showAlert && (
+                        <Alert variant={alertVariant} onClose={() => setShowAlert(false)} dismissible>
+                            {alertMessage}
+                        </Alert>
+                    )}
                     <Form onSubmit={handleSubmit}>
-                        <Form.Group controlId="formSubject">
+                        <Form.Group className="mb-3" controlId="formSubject">
                             <Form.Label>Subject</Form.Label>
                             <Form.Control
                                 type="text"
@@ -49,7 +61,8 @@ const AddNote = ({ role }) => {
                                 required
                             />
                         </Form.Group>
-                        <Form.Group controlId="formFile">
+
+                        <Form.Group className="mb-3" controlId="formFile">
                             <Form.Label>Upload Note File</Form.Label>
                             <Form.Control
                                 type="file"
@@ -57,16 +70,7 @@ const AddNote = ({ role }) => {
                                 required
                             />
                         </Form.Group>
-                        <Form.Group controlId="formEducatorName">
-                            <Form.Label>Educator Name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter educator name"
-                                value={educatorName}
-                                onChange={(e) => setEducatorName(e.target.value)}
-                                required
-                            />
-                        </Form.Group>
+
                         <Button variant="primary" type="submit" className="w-100">
                             Add Note
                         </Button>

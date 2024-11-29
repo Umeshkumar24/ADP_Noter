@@ -25,6 +25,11 @@ public class Note {
     @Lob
     private byte[] fileContent;
 
+    private String educator;
+
+    @Lob
+    private byte[] pdfFile;
+
     // Getters and setters
     public Long getId() {
         return id;
@@ -72,5 +77,21 @@ public class Note {
 
     public void setFileContent(byte[] fileContent) {
         this.fileContent = fileContent;
+    }
+
+    public String getEducator() {
+        return educator;
+    }
+
+    public void setEducator(String educator) {
+        this.educator = educator;
+    }
+
+    public byte[] getPdfFile() {
+        return pdfFile;
+    }
+
+    public void setPdfFile(byte[] pdfFile) {
+        this.pdfFile = pdfFile;
     }
 }

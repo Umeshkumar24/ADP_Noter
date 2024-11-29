@@ -24,4 +24,10 @@ public class NoteService {
     public Note saveNote(Note note) {
         return noteRepository.save(note);
     }
+
+    public Note getNoteById(Long id) {
+        return noteRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Note not found with id: " + id));
+    }
+
 }

@@ -1,15 +1,13 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api/notes';
+import apiClient from './apiConfig';
 
 export const getAllNotes = () => {
-    return axios.get(API_URL);
+    return apiClient.get('/notes');
 };
 
 export const getNotesBySubject = (subject) => {
-    return axios.get(`${API_URL}/subject/${subject}`);
+    return apiClient.get(`/notes/subject/${subject}`);
 };
 
 export const createNote = (note, role) => {
-    return axios.post(API_URL, note, { params: { role } });
+    return apiClient.post('/notes', note, { params: { role } });
 };

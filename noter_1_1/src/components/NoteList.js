@@ -1,26 +1,104 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Container, Row, Col, Button, Card, ListGroup } from 'react-bootstrap';
+import apiClient from '../services/apiConfig';
+import { Container, Row, Col, Button, Card, ListGroup, Alert } from 'react-bootstrap';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import axios from 'axios';
 
 const NoteList = () => {
     const [notes, setNotes] = useState([]);
     const [selectedPdf, setSelectedPdf] = useState(null);
+    const [error, setError] = useState(null);
     const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
     useEffect(() => {
-        axios.get('/api/notes').then(response => {
-            setNotes(response.data);
-        });
+        fetchNotes();
     }, []);
+
+    const fetchNotes = async () => {
+        try {
+            const response = await apiClient.get('/notes');
+            setNotes(response.data);
+        } catch (error) {
+            console.error('Failed to fetch notes:', error);
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to load notes';
+            setError(errorMessage);
+        }
+    };
 
     const fetchPdf = async (noteId) => {
         try {
-            const response = await axios.get(`/api/notes/${noteId}/pdf`, { responseType: 'blob' });
-            setSelectedPdf(URL.createObjectURL(response.data));
+            setError(null);
+            console.log(`Fetching PDF for note ${noteId}`);
+            
+            const response = await apiClient.get(`/notes/${noteId}/pdf`, { 
+                responseType: 'blob',
+                headers: {
+                    'Accept': 'application/pdf'
+                }
+            });
+            
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            setSelectedPdf(URL.createObjectURL(pdfBlob));
+        } catch (error) {
+            console.error('Failed to fetch PDF:', error);
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to load PDF';
+            setError(errorMessage);
+        }
+    };
+
+    const handlePdfDownload = async (noteId) => {
+        try {
+            const pdfBlob = await fetchNotes(noteId);
+            const url = window.URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `note-${noteId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Failed to fetch PDF:', error);
+        }
+    };
+
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('subject', event.target.subject.value);
+
+        try {
+            await axios.post('/api/notes/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            // Handle success
+        } catch (error) {
+            console.error('Upload failed:', error);
+        }
+    };
+
+    const downloadPdf = async (id) => {
+        try {
+            const response = await axios.get(`http://localhost:9090/api/notes/${id}/pdf`, {
+                responseType: 'blob'
+            });
+            
+            console.log("Response received:", response);
+            
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `note-${id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
         } catch (error) {
             console.error('Failed to fetch PDF:', error);
         }
@@ -29,6 +107,9 @@ const NoteList = () => {
     return (
         <Container>
             <h1 className="my-4">All Notes</h1>
+            {error && typeof error === 'string' && (
+                <Alert variant="danger">{error}</Alert>
+            )}
             <Row>
                 <Col md={6}>
                     <ListGroup>
@@ -37,13 +118,17 @@ const NoteList = () => {
                                 <Card>
                                     <Card.Body>
                                         <Card.Title>{note.subject}</Card.Title>
-                                        <Card.Text>{note.content}</Card.Text>
                                         <Card.Subtitle className="mb-2 text-muted">
                                             Educator: {note.educatorName}
                                         </Card.Subtitle>
-                                        <Button variant="primary" onClick={() => fetchPdf(note.id)}>
+                                        <Button 
+                                            variant="primary" 
+                                            onClick={() => fetchPdf(note.id)}
+                                            disabled={!note.fileContent}
+                                        >
                                             View PDF
                                         </Button>
+                                        <Button onClick={() => downloadPdf(note.id)}>Download PDF</Button>
                                     </Card.Body>
                                 </Card>
                             </ListGroup.Item>
