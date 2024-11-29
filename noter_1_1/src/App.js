@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container, Row, Col, Button, Navbar, Nav } from 'react-bootstrap';
 import NoteList from './components/NoteList';
 import AddNote from './components/AddNote';
 import AuthForm from './components/AuthForm';
@@ -37,27 +39,35 @@ const App = () => {
     };
 
     return (
-        <div>
-            <h1>Class Notes</h1>
-            {!user ? (
-                <>
-                    <button onClick={toggleUserType}>
+        <>
+            <Navbar bg="dark" variant="dark" expand="lg-bg">
+                <Navbar.Brand href="#">Noter Notes</Navbar.Brand>
+                <Nav className="ml-auto">
+                    <Button variant="outline-light" onClick={toggleUserType}>
                         Switch to {userType === 'student' ? 'Educator' : 'Student'}
-                    </button>
-                    <AuthForm 
-                        userType={userType} 
-                        isLogin={isLogin} 
-                        onSubmit={handleAuth} 
-                        onToggle={toggleAuthMode} 
-                    />
-                </>
-            ) : (
-                <>
-                    {user.role === 'EDUCATOR' && <AddNote role={user.role} />}
-                    <NoteList />
-                </>
-            )}
-        </div>
+                    </Button>
+                </Nav>
+            </Navbar>
+            <Container>
+                <Row className="justify-content-md-center mt-5">
+                    <Col md={6}>
+                        {!user ? (
+                            <AuthForm
+                                userType={userType}
+                                isLogin={isLogin}
+                                onSubmit={handleAuth}
+                                onToggle={toggleAuthMode}
+                            />
+                        ) : (
+                            <>
+                                {user.role === 'EDUCATOR' && <AddNote role={user.role} />}
+                                <NoteList />
+                            </>
+                        )}
+                    </Col>
+                </Row>
+            </Container >
+        </>
     );
 };
 
