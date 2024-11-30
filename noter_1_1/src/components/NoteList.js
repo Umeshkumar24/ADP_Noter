@@ -5,7 +5,6 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import axios from 'axios';
 
 const NoteList = () => {
     const [notes, setNotes] = useState([]);
@@ -49,59 +48,58 @@ const NoteList = () => {
         }
     };
 
-    const handlePdfDownload = async (noteId) => {
+    const downloadPdf = async (noteId) => {
         try {
-            const pdfBlob = await fetchNotes(noteId);
-            const url = window.URL.createObjectURL(pdfBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `note-${noteId}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Failed to fetch PDF:', error);
-        }
-    };
-
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('subject', event.target.subject.value);
-
-        try {
-            await axios.post('/api/notes/upload', formData, {
+            console.log(`Attempting to download PDF for note ${noteId}`);
+            
+            const response = await apiClient.get(`/notes/${noteId}/pdf`, {
+                responseType: 'blob',
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Accept': 'application/pdf'
                 }
             });
-            // Handle success
+            
+            // Create blob URL
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            
+            // Create temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `note-${noteId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Cleanup
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
         } catch (error) {
-            console.error('Upload failed:', error);
+            console.error('Download error:', error);
+            alert('Could not download PDF. Please make sure the note has a PDF attached.');
         }
     };
 
-    const downloadPdf = async (id) => {
-        try {
-            const response = await axios.get(`http://localhost:9090/api/notes/${id}/pdf`, {
-                responseType: 'blob'
-            });
-            
-            console.log("Response received:", response);
-            
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `note-${id}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        } catch (error) {
-            console.error('Failed to fetch PDF:', error);
-        }
+    const renderNoteItem = (note) => {
+        return (
+            <div>
+                <Card>
+                    <Card.Body>
+                        <Card.Title>{note.subject}</Card.Title>
+                        <Card.Subtitle className="mb-2 text-muted">
+                            Educator: {note.educatorName}
+                        </Card.Subtitle>
+                        <Button 
+                            variant="primary" 
+                            onClick={() => fetchPdf(note.id)}
+                            disabled={!note.fileContent}
+                        >
+                            View PDF
+                        </Button>
+                        <Button onClick={() => downloadPdf(note.id)}>Download PDF</Button>
+                    </Card.Body>
+                </Card>
+            </div>
+        );
     };
 
     return (
@@ -115,22 +113,7 @@ const NoteList = () => {
                     <ListGroup>
                         {notes.map(note => (
                             <ListGroup.Item key={note.id}>
-                                <Card>
-                                    <Card.Body>
-                                        <Card.Title>{note.subject}</Card.Title>
-                                        <Card.Subtitle className="mb-2 text-muted">
-                                            Educator: {note.educatorName}
-                                        </Card.Subtitle>
-                                        <Button 
-                                            variant="primary" 
-                                            onClick={() => fetchPdf(note.id)}
-                                            disabled={!note.fileContent}
-                                        >
-                                            View PDF
-                                        </Button>
-                                        <Button onClick={() => downloadPdf(note.id)}>Download PDF</Button>
-                                    </Card.Body>
-                                </Card>
+                                {renderNoteItem(note)}
                             </ListGroup.Item>
                         ))}
                     </ListGroup>

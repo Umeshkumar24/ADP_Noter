@@ -1,38 +1,24 @@
-import axios from "axios";
+import axios from 'axios';
 
-const instance = axios.create({
-  baseURL: "http://localhost:9090/api",
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: 'http://localhost:9090/api',
   headers: {
-    "Content-Type": "application/json",
-    "Accept": "application/json"
-  },
-  withCredentials: true
+    'Content-Type': 'application/json'
+  }
 });
 
-// Add response interceptor to handle errors
-instance.interceptors.response.use(
+// Add response interceptor for error handling
+api.interceptors.response.use(
   response => response,
   error => {
-    console.error('API Error:', error);
+    if (error.response?.status === 404) {
+      console.error(`Resource not found: ${error.config.url}`);
+    }
     return Promise.reject(error);
   }
 );
 
-export const fetchNotePdf = async (noteId) => {
-  try {
-    const response = await instance.get(`/notes/${noteId}/pdf`, {
-      responseType: 'blob',
-      headers: {
-        'Accept': 'application/pdf'  // Explicitly state we want PDF
-      }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
-  }
-};
-
-export default instance;
+export default api;
 
 

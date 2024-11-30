@@ -5,75 +5,78 @@ import { Container, Row, Col, Button, Navbar, Nav } from 'react-bootstrap';
 import NoteList from './components/NoteList';
 import AddNote from './components/AddNote';
 import AuthForm from './components/AuthForm';
-import { registerStudent, loginStudent } from './services/studentApi';
-import { registerEducator, loginEducator } from './services/educatorApi';
-import EducatorDashboard from './components/EducatorDashboard';
+import HandleAuth from './components/HandleAuth';
 
 const App = () => {
     const [user, setUser] = useState(null);
-    const [userType, setUserType] = useState(null);
-    const [isLogin, setIsLogin] = useState(true);
+    const [userType, setUserType] = useState('student');
+    const [isLogin, setIsLogin] = useState(null);
 
-    const handleAuth = async (credentials, userType) => {
-        try {
-            let loggedInUser;
-            if (userType === 'student') {
-                loggedInUser = isLogin
-                    ? await loginStudent(credentials)
-                    : await registerStudent(credentials);
-            } else {
-                loggedInUser = isLogin
-                    ? await loginEducator(credentials)
-                    : await registerEducator(credentials);
-            }
-            setUser(loggedInUser.data);
-            setUserType(userType);
-        } catch (error) {
-            console.error(`${isLogin ? 'Login' : 'Registration'} failed:`, error);
+    const { handleAuth } = HandleAuth({ setUser, setUserType, isLogin });
+
+    const renderDashboard = () => {
+        console.log('Rendering dashboard for:', userType, 'User:', user);
+        
+        if (userType === 'educator') {
+            return (
+                <Container>
+                    <h2>Welcome Educator{user?.username ? `, ${user.username}` : ''}</h2>
+                    <AddNote 
+                        role="EDUCATOR" 
+                        educatorName={user?.username}
+                    />
+                </Container>
+            );
+        } else if (userType === 'student'){
+            return (
+                <Container>
+                    <h2>Welcome Student{user?.username ? `, ${user.username}` : ''}</h2>
+                    <NoteList />
+                </Container>
+            );
         }
-    };
-
-    const toggleAuthMode = () => {
-        setIsLogin(!isLogin);
-    };
-
-    const toggleUserType = () => {
-        setUserType(userType === 'student' ? 'educator' : 'student');
     };
 
     return (
         <>
-            <Navbar bg="dark" variant="dark" expand="lg-bg">
+            <Navbar bg="dark" variant="dark" expand="lg">
                 <Navbar.Brand href="#">Noter Notes</Navbar.Brand>
                 <Nav className="ml-auto">
-                    <Button variant="outline-light" onClick={toggleUserType}>
-                        Switch to {userType === 'student' ? 'Educator' : 'Student'}
-                    </Button>
+                    {!user && (
+                        <Button 
+                            variant="outline-light" 
+                            className="me-2"
+                            onClick={() => setUserType(prev => prev === 'student' ? 'educator' : 'student')}
+                        >
+                            Switch to {userType === 'student' ? 'Educator' : 'Student'}
+                        </Button>
+                    )}
+                    {user && (
+                        <Button 
+                            variant="outline-light"
+                            onClick={() => setUser(null)}
+                        >
+                            Logout
+                        </Button>
+                    )}
                 </Nav>
             </Navbar>
             <Container className='blur'>
                 <Row className="justify-content-md-center mt-5">
-                    <Col md={6}>
+                    <Col md={8}>
                         {!user ? (
                             <AuthForm
                                 userType={userType}
                                 isLogin={isLogin}
                                 onSubmit={handleAuth}
-                                onToggle={toggleAuthMode}
+                                onToggle={() => setIsLogin(!isLogin)}
                             />
                         ) : (
-                            userType === 'educator' ? (
-                                <EducatorDashboard educator={user} />
-                            ) : (
-                                <>
-                                    {user.role === 'EDUCATOR' && <AddNote role={user.role} />}
-                                    <NoteList />
-                                </>
-                            )
+                            renderDashboard()
                         )}
                     </Col>
                 </Row>
-            </Container >
+            </Container>
         </>
     );
 };
