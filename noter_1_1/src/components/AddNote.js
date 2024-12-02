@@ -11,12 +11,6 @@ const AddNote = ({ role, educatorName }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (role !== 'EDUCATOR') {
-            setAlertVariant('danger');
-            setAlertMessage('Only educators can create notes');
-            setShowAlert(true);
-            return;
-        }
 
         try {
             const formData = new FormData();
@@ -25,14 +19,20 @@ const AddNote = ({ role, educatorName }) => {
             formData.append('educatorName', educatorName);
 
             const response = await createNote(formData);
-            setAlertVariant('success');
-            setAlertMessage('Note created successfully!');
-            setShowAlert(true);
-            
-            // Reset form
-            setSubject('');
-            setFile(null);
-            
+
+            if (response && response.id) {
+                setAlertVariant('success');
+                setAlertMessage('Note created successfully!');
+                setShowAlert(true);
+
+                // Reset form
+                setSubject('');
+                setFile(null);
+            } else {
+                setAlertVariant('danger');
+                setAlertMessage('Failed to create note');
+                setShowAlert(true);
+            }
         } catch (error) {
             setAlertVariant('danger');
             setAlertMessage('Error creating note. Please try again.');
@@ -44,7 +44,7 @@ const AddNote = ({ role, educatorName }) => {
     return (
         <Container>
             <Row className="justify-content-md-center mt-5">
-                <Col md={6}>
+                <Col md={8}>
                     {showAlert && (
                         <Alert variant={alertVariant} onClose={() => setShowAlert(false)} dismissible>
                             {alertMessage}

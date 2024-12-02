@@ -51,10 +51,19 @@ public class NoteController {
 
             Note savedNote = noteService.saveNote(note);
             logger.info("Note created successfully with ID: {}", savedNote.getId());
-            return ResponseEntity.ok(savedNote);
-        } catch (Exception e) {
-            logger.error("Error creating note", e);
-            return ResponseEntity.badRequest().body("Error creating note: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.OK).body(savedNote);
+        } catch (IOException e) {
+            logger.error("Error reading file content", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error reading file content: " + e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid input parameters", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Invalid input parameters: " + e.getMessage()));
+        } catch (RuntimeException e) {
+            logger.error("Error saving note", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error saving note: " + e.getMessage()));
         }
     }
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { registerStudent, loginStudent } from '../services/studentApi';
 import { registerEducator, loginEducator } from '../services/educatorApi';
 
@@ -12,7 +11,7 @@ const HandleAuth = ({ setUser, setUserType, isLogin }) => {
                     : await registerStudent(credentials);
                     
                 if (response?.data) {
-                    console.log('Student auth successful:', response.data);
+                    //console.log('Student auth successful:', response.data);
                     setUser(response.data);
                     setUserType('student');
                 } else {
@@ -24,7 +23,7 @@ const HandleAuth = ({ setUser, setUserType, isLogin }) => {
                     : await registerEducator(credentials);
                     
                 if (response?.data) {
-                    console.log('Educator auth successful:', response.data);
+                    //console.log('Educator auth successful:', response.data);
                     setUser(response.data);
                     setUserType('educator');
                 } else {
